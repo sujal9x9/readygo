@@ -88,23 +88,23 @@ export default function AboutPage() {
             <h2 className="mt-3 font-heading text-3xl font-bold text-secondary md:text-5xl">Meet The People Behind The Trips</h2>
           </div>
 
-          <div className="mx-auto grid max-w-5xl gap-6 lg:grid-cols-2">
+          <div className="mx-auto grid max-w-5xl gap-4 md:gap-6 lg:grid-cols-2">
             {teamMembers.map((member) => (
-              <article key={member.id} className="grid overflow-hidden rounded-[24px] border border-secondary/10 bg-white shadow-xl md:shadow-2xl shadow-blue-950/8 sm:grid-cols-[160px_1fr]">
-                <div className="relative h-[220px] bg-blue-50 sm:h-full sm:min-h-[220px]">
+              <article key={member.id} className="grid grid-cols-[104px_1fr] overflow-hidden rounded-[20px] border border-secondary/10 bg-white shadow-lg shadow-blue-950/8 sm:grid-cols-[150px_1fr] md:rounded-[24px] md:shadow-2xl">
+                <div className="relative h-full min-h-[172px] bg-blue-50 sm:min-h-[210px]">
                   <Image
                     src={member.image}
                     alt={member.name}
                     fill
-                    className="object-cover object-center"
-                    sizes="(max-width: 640px) 100vw, 190px"
+                    className="object-cover object-top"
+                    sizes="(max-width: 640px) 104px, 150px"
                     quality={95}
                   />
                 </div>
-                <div className="p-4 md:p-6">
-                  <p className="text-xs md:text-sm font-bold uppercase tracking-[0.16em] text-accent">{member.role}</p>
-                  <h3 className="mt-2 font-heading text-2xl md:text-3xl font-bold text-secondary">{member.name}</h3>
-                  <p className="mt-3 md:mt-4 text-sm md:text-base leading-relaxed text-muted">{member.description}</p>
+                <div className="p-4 sm:p-5 md:p-6">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-accent sm:text-xs md:text-sm md:tracking-[0.16em]">{member.role}</p>
+                  <h3 className="mt-1.5 font-heading text-xl font-bold leading-tight text-secondary sm:text-2xl md:text-3xl">{member.name}</h3>
+                  <p className="mt-2 text-xs leading-relaxed text-muted sm:text-sm md:mt-4 md:text-base">{member.description}</p>
                 </div>
               </article>
             ))}
