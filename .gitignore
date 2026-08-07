@@ -1,0 +1,38 @@
+# dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# production
+build/
+dist/
+
+# local env
+.env
+.env.*
+!.env.example
+
+# caches and logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.eslintcache
+tsconfig.tsbuildinfo
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# local source/reference files not used by the site
+team/
+details.txt
+*.exe
+*.EXE
+1001553921.png
+Copy of Dark Blue White Minimalist Sport Wear Logo_20260414_173401_0000.png
