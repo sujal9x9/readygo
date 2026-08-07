@@ -30,7 +30,7 @@ Thumbs.db
 .idea/
 
 # local source/reference files not used by the site
-team/
+/team/
 details.txt
 *.exe
 *.EXE
