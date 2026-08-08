@@ -1,3 +1,5 @@
+'use client';
+
 import Image from 'next/image';
 import { Mail, MapPin, Phone } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
@@ -6,9 +8,14 @@ import FloatingWhatsApp from '@/components/ui/FloatingWhatsApp';
 import BackToTop from '@/components/ui/BackToTop';
 import CursorGlow from '@/components/ui/CursorGlow';
 import BookingForm from '@/components/sections/BookingForm';
-import { contactInfo, teamMembers } from '@/lib/data';
+import { contactInfo, destinations, teamMembers } from '@/lib/data';
+import { useCmsData } from '@/lib/sheetCms';
 
 export default function ContactPage() {
+  const cms = useCmsData({ destinations, teamMembers });
+  const teamData = cms.teamMembers.length ? cms.teamMembers : teamMembers;
+  const contact = { ...contactInfo, ...cms.contactInfo };
+
   return (
     <>
       <CursorGlow />
@@ -41,17 +48,17 @@ export default function ContactPage() {
               </p>
 
               <div className="mt-6 space-y-4">
-                <a href={`tel:${contactInfo.phone}`} className="flex items-center gap-3 rounded-2xl bg-blue-50 p-4 text-secondary">
+                <a href={`tel:${contact.phone}`} className="flex items-center gap-3 rounded-2xl bg-blue-50 p-4 text-secondary">
                   <Phone className="h-5 w-5 text-accent" />
-                  <span className="font-semibold">{contactInfo.phone}</span>
+                  <span className="font-semibold">{contact.phone}</span>
                 </a>
-                <a href={`mailto:${contactInfo.email}`} className="flex items-center gap-3 rounded-2xl bg-blue-50 p-4 text-secondary">
+                <a href={`mailto:${contact.email}`} className="flex items-center gap-3 rounded-2xl bg-blue-50 p-4 text-secondary">
                   <Mail className="h-5 w-5 text-accent" />
-                  <span className="font-semibold">{contactInfo.email}</span>
+                  <span className="font-semibold">{contact.email}</span>
                 </a>
                 <div className="flex items-center gap-3 rounded-2xl bg-blue-50 p-4 text-secondary">
                   <MapPin className="h-5 w-5 text-accent" />
-                  <span className="font-semibold">{contactInfo.address}</span>
+                  <span className="font-semibold">{contact.address}</span>
                 </div>
               </div>
             </div>
@@ -59,7 +66,7 @@ export default function ContactPage() {
             <div className="rounded-[24px] md:rounded-[28px] border border-secondary/10 bg-white p-5 md:p-6 shadow-xl shadow-blue-950/8">
               <h2 className="font-heading text-2xl md:text-3xl font-bold text-secondary">Team</h2>
               <div className="mt-5 space-y-4">
-                {teamMembers.map((member) => (
+                {teamData.map((member) => (
                   <div key={member.id} className="flex items-center gap-4">
                     <div className="relative h-16 w-16 overflow-hidden rounded-2xl bg-blue-50">
                       <Image src={member.image} alt={member.name} fill className="object-cover object-center" sizes="64px" quality={95} />
@@ -81,7 +88,7 @@ export default function ContactPage() {
       </main>
 
       <Footer />
-      <FloatingWhatsApp phone={contactInfo.whatsapp} />
+      <FloatingWhatsApp phone={contact.whatsapp} />
       <BackToTop />
     </>
   );

@@ -3,12 +3,15 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
-import { faqs } from '@/lib/data';
+import { destinations, faqs } from '@/lib/data';
+import { useCmsData } from '@/lib/sheetCms';
 import SectionHeading from '@/components/ui/SectionHeading';
 import FadeUp from '@/components/animations/FadeUp';
 
 export default function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const cms = useCmsData({ destinations, faqs });
+  const faqData = cms.faqs.length ? cms.faqs : faqs;
 
   const toggle = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
@@ -19,7 +22,7 @@ export default function FAQ() {
       <SectionHeading title="Frequently Asked Questions" subtitle="Everything you need to know before your trip" />
       
       <div className="mt-8 md:mt-10">
-        {faqs.slice(0, 5).map((faq, index) => (
+        {faqData.slice(0, 5).map((faq, index) => (
           <FadeUp key={faq.id} delay={index * 0.05}>
             <div className="mb-3">
               <button 

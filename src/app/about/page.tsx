@@ -1,3 +1,5 @@
+'use client';
+
 import Image from 'next/image';
 import { Award, Compass, ShieldCheck, Users } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
@@ -5,7 +7,8 @@ import Footer from '@/components/layout/Footer';
 import FloatingWhatsApp from '@/components/ui/FloatingWhatsApp';
 import BackToTop from '@/components/ui/BackToTop';
 import CursorGlow from '@/components/ui/CursorGlow';
-import { contactInfo, teamMembers } from '@/lib/data';
+import { contactInfo, destinations, teamMembers } from '@/lib/data';
+import { useCmsData } from '@/lib/sheetCms';
 
 const values = [
   {
@@ -31,6 +34,10 @@ const values = [
 ];
 
 export default function AboutPage() {
+  const cms = useCmsData({ destinations, teamMembers });
+  const teamData = cms.teamMembers.length ? cms.teamMembers : teamMembers;
+  const contact = { ...contactInfo, ...cms.contactInfo };
+
   return (
     <>
       <CursorGlow />
@@ -89,7 +96,7 @@ export default function AboutPage() {
           </div>
 
           <div className="mx-auto grid max-w-5xl gap-4 md:gap-6 lg:grid-cols-2">
-            {teamMembers.map((member) => (
+            {teamData.map((member) => (
               <article key={member.id} className="grid grid-cols-[104px_1fr] overflow-hidden rounded-[20px] border border-secondary/10 bg-white shadow-lg shadow-blue-950/8 sm:grid-cols-[150px_1fr] md:rounded-[24px] md:shadow-2xl">
                 <div className="relative h-full min-h-[172px] bg-blue-50 sm:min-h-[210px]">
                   <Image
@@ -113,7 +120,7 @@ export default function AboutPage() {
       </main>
 
       <Footer />
-      <FloatingWhatsApp phone={contactInfo.whatsapp} />
+      <FloatingWhatsApp phone={contact.whatsapp} />
       <BackToTop />
     </>
   );

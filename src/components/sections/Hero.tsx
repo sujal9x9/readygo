@@ -2,7 +2,8 @@
 
 import Image from 'next/image';
 import { Compass, MapPin, Star, Users } from 'lucide-react';
-import { contactInfo } from '@/lib/data';
+import { contactInfo, destinations } from '@/lib/data';
+import { useCmsData } from '@/lib/sheetCms';
 import FadeUp from '@/components/animations/FadeUp';
 import MagneticButton from '@/components/ui/MagneticButton';
 import ScrollIndicator from '@/components/ui/ScrollIndicator';
@@ -14,6 +15,10 @@ const heroStats = [
 ];
 
 export default function Hero() {
+  const cms = useCmsData({ destinations });
+  const siteInfo = cms.siteInfo;
+  const contact = { ...contactInfo, ...cms.contactInfo };
+
   return (
     <section id="home" className="relative min-h-[560px] overflow-hidden text-white md:min-h-[640px]">
       <div className="absolute inset-0">
@@ -40,31 +45,31 @@ export default function Hero() {
 
           <FadeUp delay={0.2}>
             <h1 className="mt-5 max-w-4xl font-serif text-5xl font-medium leading-[0.9] tracking-normal text-white drop-shadow-[0_12px_34px_rgba(0,0,0,0.38)] sm:text-6xl md:text-7xl lg:text-[7.4rem]">
-              Travel More.<br />
+              {siteInfo?.heroHeadingLine1 || 'Travel More.'}<br />
               <span className="relative inline-block pr-2 italic text-accent">
-                Explore
+                {siteInfo?.heroHeadingLine2 || 'Explore'}
                 <span className="absolute -bottom-2 left-0 h-1 w-full -rotate-2 rounded-full bg-accent" />
               </span>{' '}
-              <span className="inline-block">Wilder.</span>
+              <span className="inline-block">{siteInfo?.heroHeadingLine3 || 'Wilder.'}</span>
             </h1>
           </FadeUp>
 
           <FadeUp delay={0.4}>
             <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-blue-50/92 sm:text-lg md:mx-0">
-              Handpicked routes. Trusted stays. Expert trip captains. We turn every getaway into a story worth retelling.
+              {siteInfo?.heroSubtitle || 'Handpicked routes. Trusted stays. Expert trip captains. We turn every getaway into a story worth retelling.'}
             </p>
           </FadeUp>
 
           <FadeUp delay={0.6}>
             <div className="mt-7 flex flex-col justify-center gap-4 sm:flex-row md:justify-start">
               <MagneticButton href="#packages" className="rounded-xl px-7 py-3.5">
-                Explore Packages
+                {siteInfo?.primaryButtonText || 'Explore Packages'}
               </MagneticButton>
               <a
-                href={`https://wa.me/${contactInfo.whatsapp}`}
+                href={`https://wa.me/${contact.whatsapp}`}
                 className="flex items-center justify-center rounded-xl border border-white/60 bg-white px-7 py-3.5 font-semibold text-secondary shadow-xl shadow-black/15 transition hover:bg-blue-50"
               >
-                View Itineraries
+                {siteInfo?.secondaryButtonText || 'View Itineraries'}
               </a>
             </div>
           </FadeUp>

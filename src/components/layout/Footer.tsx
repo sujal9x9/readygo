@@ -3,7 +3,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Instagram, Mail, MapPin, Phone } from 'lucide-react';
-import { contactInfo, navLinks } from '@/lib/data';
+import { contactInfo, destinations, navLinks } from '@/lib/data';
+import { useCmsData } from '@/lib/sheetCms';
 
 function WhatsAppIcon({ className }: { className?: string }) {
   return (
@@ -14,6 +15,10 @@ function WhatsAppIcon({ className }: { className?: string }) {
 }
 
 export default function Footer() {
+  const cms = useCmsData({ destinations });
+  const contact = { ...contactInfo, ...cms.contactInfo };
+  const siteInfo = cms.siteInfo;
+
   return (
     <footer id="contact" className="relative overflow-hidden bg-secondary text-white">
       <div className="absolute inset-0 opacity-[0.18]">
@@ -34,10 +39,10 @@ export default function Footer() {
                 className="h-11 md:h-14 w-auto object-contain drop-shadow-[0_10px_24px_rgba(0,0,0,0.35)]"
               />
             </div>
-            <p className="mb-3 max-w-xs text-xs md:text-sm text-blue-50/85">{contactInfo.tagline}</p>
+            <p className="mb-3 max-w-xs text-xs md:text-sm text-blue-50/85">{siteInfo?.tagline || contact.tagline}</p>
             <div className="flex items-center gap-2">
               <a
-                href={contactInfo.instagram}
+                href={contact.instagram}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition hover:-translate-y-0.5 hover:bg-white hover:text-secondary"
@@ -46,7 +51,7 @@ export default function Footer() {
                 <Instagram className="h-4.5 w-4.5" />
               </a>
               <a
-                href={`https://wa.me/${contactInfo.whatsapp}`}
+                href={`https://wa.me/${contact.whatsapp}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition hover:-translate-y-0.5 hover:bg-[#25D366] hover:text-white"
@@ -88,18 +93,18 @@ export default function Footer() {
             <ul className="space-y-2.5">
               <li className="flex items-start gap-2.5 text-sm text-blue-50/80">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-white" />
-                <span>{contactInfo.address}</span>
+                <span>{contact.address}</span>
               </li>
               <li className="flex items-center gap-2.5 text-sm text-blue-50/80">
                 <Phone className="h-4 w-4 shrink-0 text-white" />
-                <a href={`tel:${contactInfo.phone}`} className="transition-colors hover:text-white">
-                  {contactInfo.phone}
+                <a href={`tel:${contact.phone}`} className="transition-colors hover:text-white">
+                  {contact.phone}
                 </a>
               </li>
               <li className="flex items-center gap-2.5 text-sm text-blue-50/80">
                 <Mail className="h-4 w-4 shrink-0 text-white" />
-                <a href={`mailto:${contactInfo.email}`} className="transition-colors hover:text-white">
-                  {contactInfo.email}
+                <a href={`mailto:${contact.email}`} className="transition-colors hover:text-white">
+                  {contact.email}
                 </a>
               </li>
             </ul>
@@ -107,7 +112,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-6 flex flex-col items-center justify-between gap-2 border-t border-white/15 pt-4 md:flex-row">
-          <p className="text-xs text-blue-50/80">&copy; 2026 {contactInfo.brand}. All rights reserved.</p>
+          <p className="text-xs text-blue-50/80">&copy; 2026 {siteInfo?.brandName || contact.brand}. All rights reserved.</p>
           <p className="text-xs text-blue-50/80">Made for adventure</p>
         </div>
       </div>

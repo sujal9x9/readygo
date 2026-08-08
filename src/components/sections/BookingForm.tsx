@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { CalendarDays, Mail, MapPin, Phone, Send, User } from 'lucide-react';
 import { contactInfo, destinations } from '@/lib/data';
+import { useCmsData } from '@/lib/sheetCms';
 
 type BookingFormState = {
   name: string;
@@ -29,6 +30,9 @@ const initialState: BookingFormState = {
 export default function BookingForm() {
   const [form, setForm] = useState(initialState);
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'fallback'>('idle');
+  const cms = useCmsData({ destinations });
+  const packageData = cms.packages.length ? cms.packages : destinations;
+  const contact = { ...contactInfo, ...cms.contactInfo };
 
   const emailBody = useMemo(
     () =>
@@ -56,7 +60,7 @@ export default function BookingForm() {
   const openMailFallback = () => {
     const subject = encodeURIComponent(`Booking enquiry - ${form.destination || 'Ready Go Trips'}`);
     const body = encodeURIComponent(emailBody);
-    window.location.href = `mailto:${contactInfo.email}?subject=${subject}&body=${body}`;
+    window.location.href = `mailto:${contact.email}?subject=${subject}&body=${body}`;
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -78,7 +82,7 @@ export default function BookingForm() {
     };
 
     try {
-      const response = await fetch(`https://formsubmit.co/ajax/${contactInfo.email}`, {
+      const response = await fetch(`https://formsubmit.co/ajax/${contact.email}`, {
         method: 'POST',
         headers: {
           Accept: 'application/json',
@@ -158,7 +162,7 @@ export default function BookingForm() {
             className="w-full rounded-2xl border border-secondary/15 bg-blue-50 px-4 py-2.5 md:py-3 text-secondary outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/10"
           >
             <option value="">Select a package</option>
-            {destinations.map((destination) => (
+            {packageData.map((destination) => (
               <option key={destination.id} value={destination.name}>
                 {destination.name} - {destination.duration}
               </option>

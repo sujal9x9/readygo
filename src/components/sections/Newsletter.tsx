@@ -4,12 +4,15 @@ import { useState } from 'react';
 import { Send } from 'lucide-react';
 import { motion } from 'framer-motion';
 import FadeUp from '@/components/animations/FadeUp';
-import { contactInfo } from '@/lib/data';
+import { contactInfo, destinations } from '@/lib/data';
+import { useCmsData } from '@/lib/sheetCms';
 
 export default function Newsletter() {
   const [submitted, setSubmitted] = useState(false);
   const [email, setEmail] = useState('');
   const [sending, setSending] = useState(false);
+  const cms = useCmsData({ destinations });
+  const contact = { ...contactInfo, ...cms.contactInfo };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,7 +20,7 @@ export default function Newsletter() {
 
     setSending(true);
     try {
-      const response = await fetch(`https://formsubmit.co/ajax/${contactInfo.email}`, {
+      const response = await fetch(`https://formsubmit.co/ajax/${contact.email}`, {
         method: 'POST',
         headers: {
           Accept: 'application/json',
@@ -38,7 +41,7 @@ export default function Newsletter() {
     } catch {
       const subject = encodeURIComponent('New newsletter subscriber - Ready Go Trips');
       const body = encodeURIComponent(`New newsletter subscriber:\n\nEmail: ${email}`);
-      window.location.href = `mailto:${contactInfo.email}?subject=${subject}&body=${body}`;
+      window.location.href = `mailto:${contact.email}?subject=${subject}&body=${body}`;
       setSubmitted(true);
     } finally {
       setSending(false);

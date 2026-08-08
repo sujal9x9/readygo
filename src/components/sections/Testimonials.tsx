@@ -1,13 +1,16 @@
 'use client';
 
 import { Star } from 'lucide-react';
-import { testimonials } from '@/lib/data';
+import { destinations, testimonials } from '@/lib/data';
+import { useCmsData } from '@/lib/sheetCms';
 import { cn } from '@/lib/utils';
 import SectionHeading from '@/components/ui/SectionHeading';
 import FadeUp from '@/components/animations/FadeUp';
 
 export default function Testimonials() {
-  const row1 = [...testimonials, ...testimonials];
+  const cms = useCmsData({ destinations, testimonials });
+  const reviewData = cms.testimonials.length ? cms.testimonials : testimonials;
+  const row1 = [...reviewData, ...reviewData];
 
   return (
     <section id="reviews" className="py-10 md:py-16 overflow-hidden">

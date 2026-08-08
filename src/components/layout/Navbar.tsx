@@ -5,7 +5,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Menu, X, Phone } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { navLinks, contactInfo } from '@/lib/data';
+import { navLinks, contactInfo, destinations } from '@/lib/data';
+import { useCmsData } from '@/lib/sheetCms';
 import { cn } from '@/lib/utils';
 import MagneticButton from '@/components/ui/MagneticButton';
 import FadeUp from '@/components/animations/FadeUp';
@@ -14,6 +15,8 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const cms = useCmsData({ destinations });
+  const contact = { ...contactInfo, ...cms.contactInfo };
 
   useEffect(() => {
     let ticking = false;
@@ -132,9 +135,9 @@ export default function Navbar() {
               ))}
             </div>
             <div className="mt-auto text-center pb-8">
-              <a href={`tel:${contactInfo.phone}`} className="flex items-center justify-center gap-2 text-accent text-lg">
+              <a href={`tel:${contact.phone}`} className="flex items-center justify-center gap-2 text-accent text-lg">
                 <Phone className="w-5 h-5" />
-                {contactInfo.phone}
+                {contact.phone}
               </a>
             </div>
           </motion.div>

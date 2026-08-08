@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Star, ArrowRight } from 'lucide-react';
 import { destinations, featuredDestinations } from '@/lib/data';
+import { useCmsData } from '@/lib/sheetCms';
 import { formatPrice, cn } from '@/lib/utils';
 import SectionHeading from '@/components/ui/SectionHeading';
 import TiltCard from '@/components/ui/TiltCard';
@@ -13,10 +14,13 @@ const categories = ['All', 'Mountains', 'Beaches', 'Pilgrimage', 'Adventure'];
 
 export default function FeaturedDestinations() {
   const [activeFilter, setActiveFilter] = useState('All');
+  const cms = useCmsData({ destinations });
+  const destinationData = cms.packages.length ? cms.packages : destinations;
+  const featuredData = cms.featuredDestinations.length ? cms.featuredDestinations : featuredDestinations;
 
   const filteredDestinations = activeFilter === 'All' 
-    ? featuredDestinations 
-    : destinations.filter(d => d.category.toLowerCase() === activeFilter.toLowerCase());
+    ? featuredData 
+    : destinationData.filter(d => d.category.toLowerCase() === activeFilter.toLowerCase());
 
   return (
     <section id="destinations" className="py-10 md:py-20 max-w-7xl mx-auto px-4 md:px-6">

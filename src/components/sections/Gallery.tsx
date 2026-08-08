@@ -4,14 +4,17 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Eye, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { galleryImages } from '@/lib/data';
+import { destinations, galleryImages } from '@/lib/data';
+import { useCmsData } from '@/lib/sheetCms';
 import { cn } from '@/lib/utils';
 import SectionHeading from '@/components/ui/SectionHeading';
 import FadeUp from '@/components/animations/FadeUp';
 
 export default function Gallery() {
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
-  const visibleImages = galleryImages.slice(0, 6);
+  const cms = useCmsData({ destinations, galleryImages });
+  const galleryData = cms.galleryImages.length ? cms.galleryImages : galleryImages;
+  const visibleImages = galleryData.slice(0, 6);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -26,7 +29,7 @@ export default function Gallery() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedImage]);
+  }, [selectedImage, visibleImages.length]);
 
   return (
     <section id="gallery" className="py-10 md:py-16 max-w-7xl mx-auto px-4 md:px-6">

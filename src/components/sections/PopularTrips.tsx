@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { Star, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 import { destinations } from '@/lib/data';
+import { useCmsData } from '@/lib/sheetCms';
 import { formatPrice } from '@/lib/utils';
 import SectionHeading from '@/components/ui/SectionHeading';
 import FadeUp from '@/components/animations/FadeUp';
@@ -12,7 +13,9 @@ export default function PopularTrips() {
   const [showAll, setShowAll] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [slideOffset, setSlideOffset] = useState(0);
-  const visibleDestinations = showAll ? destinations : destinations.slice(0, 2);
+  const cms = useCmsData({ destinations });
+  const packageData = cms.packages.length ? cms.packages : destinations;
+  const visibleDestinations = showAll ? packageData : packageData.slice(0, 2);
   const marqueeDestinations = [...visibleDestinations, ...visibleDestinations, ...visibleDestinations];
   const maxOffset = Math.max(0, visibleDestinations.length - 1);
 
@@ -57,7 +60,7 @@ export default function PopularTrips() {
           {marqueeDestinations.map((destination, index) => (
             <FadeUp
               key={`${destination.id}-${index}`}
-              delay={(index % destinations.length) * 0.03}
+              delay={(index % packageData.length) * 0.03}
               className="flex-shrink-0 w-[235px] sm:w-64 md:w-80 relative group/card rounded-2xl overflow-hidden h-[310px] sm:h-[340px] md:h-[430px] bg-card cursor-pointer shadow-md md:shadow-xl shadow-blue-950/10 border border-secondary/10 text-white"
             >
               <div className="absolute inset-0" onClick={() => setIsPaused(true)}>
