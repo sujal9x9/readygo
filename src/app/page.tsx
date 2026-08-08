@@ -13,15 +13,11 @@ import Statistics from "@/components/sections/Statistics";
 import FAQ from "@/components/sections/FAQ";
 import Newsletter from "@/components/sections/Newsletter";
 import Footer from "@/components/layout/Footer";
-import FloatingWhatsApp from "@/components/ui/FloatingWhatsApp";
 import BackToTop from "@/components/ui/BackToTop";
 import CursorGlow from "@/components/ui/CursorGlow";
-import { contactInfo, destinations } from "@/lib/data";
-import { useCmsData } from "@/lib/sheetCms";
+import { destinations } from "@/lib/data";
 
 export default function Home() {
-  const cms = useCmsData({ destinations });
-  const contact = { ...contactInfo, ...cms.contactInfo };
 
   return (
     <>
@@ -71,7 +67,6 @@ export default function Home() {
       <Footer />
 
       {/* Floating Elements */}
-      <FloatingWhatsApp phone={contact.whatsapp} />
       <BackToTop />
     </>
   );

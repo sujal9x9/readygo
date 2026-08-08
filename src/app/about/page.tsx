@@ -4,7 +4,6 @@ import Image from 'next/image';
 import { Award, Compass, ShieldCheck, Users } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import FloatingWhatsApp from '@/components/ui/FloatingWhatsApp';
 import BackToTop from '@/components/ui/BackToTop';
 import CursorGlow from '@/components/ui/CursorGlow';
 import { contactInfo, destinations, teamMembers } from '@/lib/data';
@@ -36,7 +35,6 @@ const values = [
 export default function AboutPage() {
   const cms = useCmsData({ destinations, teamMembers });
   const teamData = cms.teamMembers.length ? cms.teamMembers : teamMembers;
-  const contact = { ...contactInfo, ...cms.contactInfo };
 
   return (
     <>
@@ -120,7 +118,6 @@ export default function AboutPage() {
       </main>
 
       <Footer />
-      <FloatingWhatsApp phone={contact.whatsapp} />
       <BackToTop />
     </>
   );

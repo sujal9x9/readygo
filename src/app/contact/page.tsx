@@ -4,7 +4,6 @@ import Image from 'next/image';
 import { Mail, MapPin, Phone } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import FloatingWhatsApp from '@/components/ui/FloatingWhatsApp';
 import BackToTop from '@/components/ui/BackToTop';
 import CursorGlow from '@/components/ui/CursorGlow';
 import BookingForm from '@/components/sections/BookingForm';
@@ -88,7 +87,6 @@ export default function ContactPage() {
       </main>
 
       <Footer />
-      <FloatingWhatsApp phone={contact.whatsapp} />
       <BackToTop />
     </>
   );
