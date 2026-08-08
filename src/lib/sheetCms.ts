@@ -10,9 +10,6 @@ import {
   testimonials as defaultTestimonials,
 } from './data';
 
-const SHEET_ID = '1SfXoc3DeVjVM1-MTQ-puAYwCwRotHxlX';
-const SHEET_BASE = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
-
 type SheetRow = Record<string, string>;
 
 export type CmsContactInfo = {
@@ -61,10 +58,6 @@ const emptyCmsData: CmsData = {
 let cachedData: CmsData | null = null;
 let cachedPromise: Promise<CmsData> | null = null;
 
-function normalizeKey(value: string) {
-  return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
-}
-
 function clean(value: unknown) {
   return String(value ?? '').trim();
 }
@@ -90,29 +83,10 @@ function validImage(value: string, fallback: string) {
 }
 
 async function fetchRows(sheet: string): Promise<SheetRow[]> {
-  const response = await fetch(`${SHEET_BASE}&sheet=${encodeURIComponent(sheet)}`, { cache: 'no-store' });
+  const response = await fetch(`/api/sheet?sheet=${encodeURIComponent(sheet)}&cachebust=${Date.now()}`, { cache: 'no-store' });
   if (!response.ok) throw new Error(`Unable to load ${sheet}`);
 
-  const text = await response.text();
-  const jsonText = text.slice(text.indexOf('{'), text.lastIndexOf('}') + 1);
-  const payload = JSON.parse(jsonText);
-  let cols = payload.table.cols.map((col: { label?: string; id?: string }) => normalizeKey(col.label || ''));
-  let rows = payload.table.rows || [];
-
-  if (!cols.some(Boolean) && rows.length) {
-    cols = (rows[0].c || []).map((cell: { v?: unknown; f?: string } | null) => normalizeKey(clean(cell?.f ?? cell?.v ?? '')));
-    rows = rows.slice(1);
-  }
-
-  return rows.map((row: { c?: Array<{ v?: unknown; f?: string } | null> }) => {
-    const nextRow: SheetRow = {};
-    cols.forEach((key: string, index: number) => {
-      if (!key) return;
-      const cell = row.c?.[index];
-      nextRow[key] = clean(cell?.f ?? cell?.v ?? '');
-    });
-    return nextRow;
-  }).filter((row: SheetRow) => Object.values(row).some(Boolean));
+  return response.json();
 }
 
 function mapPackages(rows: SheetRow[], fallbacks: Destination[]) {
