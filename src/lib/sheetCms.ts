@@ -96,9 +96,15 @@ async function fetchRows(sheet: string): Promise<SheetRow[]> {
   const text = await response.text();
   const jsonText = text.slice(text.indexOf('{'), text.lastIndexOf('}') + 1);
   const payload = JSON.parse(jsonText);
-  const cols = payload.table.cols.map((col: { label?: string; id?: string }) => normalizeKey(col.label || col.id || ''));
+  let cols = payload.table.cols.map((col: { label?: string; id?: string }) => normalizeKey(col.label || ''));
+  let rows = payload.table.rows || [];
 
-  return payload.table.rows.map((row: { c?: Array<{ v?: unknown; f?: string } | null> }) => {
+  if (!cols.some(Boolean) && rows.length) {
+    cols = (rows[0].c || []).map((cell: { v?: unknown; f?: string } | null) => normalizeKey(clean(cell?.f ?? cell?.v ?? '')));
+    rows = rows.slice(1);
+  }
+
+  return rows.map((row: { c?: Array<{ v?: unknown; f?: string } | null> }) => {
     const nextRow: SheetRow = {};
     cols.forEach((key: string, index: number) => {
       if (!key) return;
