@@ -56,7 +56,7 @@ const emptyCmsData: CmsData = {
 };
 
 let cachedData: CmsData | null = null;
-let cachedPromise: Promise<CmsData> | null = null;
+let inFlightRequest: Promise<CmsData> | null = null;
 
 function clean(value: unknown) {
   return String(value ?? '').trim();
@@ -87,6 +87,14 @@ async function fetchRows(sheet: string): Promise<SheetRow[]> {
   if (!response.ok) throw new Error(`Unable to load ${sheet}`);
 
   return response.json();
+}
+
+async function fetchRowsSafely(sheet: string): Promise<SheetRow[]> {
+  try {
+    return await fetchRows(sheet);
+  } catch {
+    return [];
+  }
 }
 
 function mapPackages(rows: SheetRow[], fallbacks: Destination[]) {
@@ -215,34 +223,41 @@ function mapContactInfo(rows: SheetRow[]): CmsContactInfo | null {
 }
 
 async function loadCmsData(): Promise<CmsData> {
-  try {
-    const [siteInfo, packages, featured, gallery, reviews, faqRows, team, contact] = await Promise.all([
-      fetchRows('Site_Info'),
-      fetchRows('Packages'),
-      fetchRows('Featured_Destinations'),
-      fetchRows('Gallery'),
-      fetchRows('Reviews'),
-      fetchRows('FAQs'),
-      fetchRows('Team'),
-      fetchRows('Contact_Info'),
-    ]);
+  const [siteInfo, packages, featured, gallery, reviews, faqRows, team, contact] = await Promise.all([
+    fetchRowsSafely('Site_Info'),
+    fetchRowsSafely('Packages'),
+    fetchRowsSafely('Featured_Destinations'),
+    fetchRowsSafely('Gallery'),
+    fetchRowsSafely('Reviews'),
+    fetchRowsSafely('FAQs'),
+    fetchRowsSafely('Team'),
+    fetchRowsSafely('Contact_Info'),
+  ]);
 
-    const packageData = mapPackages(packages, defaultDestinations);
-    const featuredData = mapFeaturedDestinations(featured, defaultDestinations);
+  const packageData = mapPackages(packages, defaultDestinations);
+  const featuredData = mapFeaturedDestinations(featured, defaultDestinations);
 
-    return {
-      siteInfo: mapSiteInfo(siteInfo),
-      contactInfo: mapContactInfo(contact),
-      packages: packageData,
-      featuredDestinations: featuredData.length ? featuredData : packageData.filter((item) => item.featured),
-      galleryImages: mapGallery(gallery, defaultGalleryImages),
-      testimonials: mapReviews(reviews, defaultTestimonials),
-      faqs: mapFaqs(faqRows, defaultFaqs),
-      teamMembers: mapTeam(team, defaultTeamMembers),
-    };
-  } catch {
-    return emptyCmsData;
-  }
+  return {
+    siteInfo: mapSiteInfo(siteInfo),
+    contactInfo: mapContactInfo(contact),
+    packages: packageData,
+    featuredDestinations: featuredData.length ? featuredData : packageData.filter((item) => item.featured),
+    galleryImages: mapGallery(gallery, defaultGalleryImages),
+    testimonials: mapReviews(reviews, defaultTestimonials),
+    faqs: mapFaqs(faqRows, defaultFaqs),
+    teamMembers: mapTeam(team, defaultTeamMembers),
+  };
+}
+
+async function refreshCmsData() {
+  inFlightRequest ||= loadCmsData().then((nextData) => {
+    cachedData = nextData;
+    return nextData;
+  }).finally(() => {
+    inFlightRequest = null;
+  });
+
+  return inFlightRequest;
 }
 
 export function useCmsData(_fallbacks: {
@@ -255,12 +270,21 @@ export function useCmsData(_fallbacks: {
   const [data, setData] = useState<CmsData>(cachedData || emptyCmsData);
 
   useEffect(() => {
-    if (cachedData) return;
-    cachedPromise ||= loadCmsData();
-    cachedPromise.then((nextData) => {
-      cachedData = nextData;
-      setData(nextData);
-    });
+    let active = true;
+
+    const update = () => {
+      refreshCmsData().then((nextData) => {
+        if (active) setData(nextData);
+      });
+    };
+
+    update();
+    const interval = window.setInterval(update, 15000);
+
+    return () => {
+      active = false;
+      window.clearInterval(interval);
+    };
   }, []);
 
   return data;
