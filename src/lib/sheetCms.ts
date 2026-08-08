@@ -279,7 +279,7 @@ export function useCmsData(_fallbacks: {
     };
 
     update();
-    const interval = window.setInterval(update, 15000);
+    const interval = window.setInterval(update, 3000);
 
     return () => {
       active = false;

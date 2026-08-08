@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 
+const LIVE_SHEET_ID = '1SfXoc3DeVjVM1-MTQ-puAYwCwRotHxlX';
+const LIVE_SHEET_BASE = `https://docs.google.com/spreadsheets/d/${LIVE_SHEET_ID}/gviz/tq?tqx=out:json`;
 const PUBLISHED_SHEET_BASE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS0byiFZv0tPDn8pVwZ9l6rMrjlxWfz8OX1Ej_fFEyF7K0lXY1ZJZ5XgBIS0v3f3g/pub';
 const SHEET_GIDS: Record<string, string> = {
   Site_Info: '397243099',
@@ -69,6 +71,42 @@ function parseCsv(csv: string) {
   return rows;
 }
 
+function rowsFromGviz(text: string) {
+  const jsonText = text.slice(text.indexOf('{'), text.lastIndexOf('}') + 1);
+  const payload = JSON.parse(jsonText);
+  let cols = payload.table.cols.map((col: { label?: string }) => normalizeKey(col.label || ''));
+  let rows = payload.table.rows || [];
+
+  if (!cols.some(Boolean) && rows.length) {
+    cols = (rows[0].c || []).map((cell: { v?: unknown; f?: string } | null) => normalizeKey(clean(cell?.f ?? cell?.v ?? '')));
+    rows = rows.slice(1);
+  }
+
+  return rows.map((row: { c?: Array<{ v?: unknown; f?: string } | null> }) => {
+    const nextRow: SheetRow = {};
+    cols.forEach((key: string, index: number) => {
+      if (!key) return;
+      const cell = row.c?.[index];
+      nextRow[key] = clean(cell?.f ?? cell?.v ?? '');
+    });
+    return nextRow;
+  }).filter((row: SheetRow) => Object.values(row).some(Boolean));
+}
+
+function rowsFromCsv(csv: string) {
+  const rows = parseCsv(csv);
+  const cols = (rows[0] || []).map((cell) => normalizeKey(cell));
+
+  return rows.slice(1).map((row) => {
+    const nextRow: SheetRow = {};
+    cols.forEach((key: string, index: number) => {
+      if (!key) return;
+      nextRow[key] = clean(row[index]);
+    });
+    return nextRow;
+  }).filter((row: SheetRow) => Object.values(row).some(Boolean));
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const sheet = searchParams.get('sheet');
@@ -83,29 +121,38 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: `Unknown sheet ${sheet}` }, { status: 404 });
     }
 
-    const response = await fetch(`${PUBLISHED_SHEET_BASE}?gid=${gid}&single=true&output=csv&cachebust=${Date.now()}`, {
-      cache: 'no-store',
-      next: { revalidate: 0 },
-    });
+    const cachebust = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    let data: SheetRow[] = [];
 
-    if (!response.ok) {
-      return NextResponse.json({ error: `Unable to load ${sheet}` }, { status: response.status });
+    try {
+      const liveResponse = await fetch(`${LIVE_SHEET_BASE}&sheet=${encodeURIComponent(sheet)}&cachebust=${cachebust}`, {
+        cache: 'no-store',
+        next: { revalidate: 0 },
+      });
+
+      if (liveResponse.ok) {
+        data = rowsFromGviz(await liveResponse.text());
+      }
+    } catch {
+      data = [];
     }
 
-    const rows = parseCsv(await response.text());
-    const cols = (rows[0] || []).map((cell) => normalizeKey(cell));
-    const data = rows.slice(1).map((row) => {
-      const nextRow: SheetRow = {};
-      cols.forEach((key: string, index: number) => {
-        if (!key) return;
-        nextRow[key] = clean(row[index]);
+    if (!data.length) {
+      const publishedResponse = await fetch(`${PUBLISHED_SHEET_BASE}?gid=${gid}&single=true&output=csv&cachebust=${cachebust}`, {
+        cache: 'no-store',
+        next: { revalidate: 0 },
       });
-      return nextRow;
-    }).filter((row: SheetRow) => Object.values(row).some(Boolean));
+
+      if (!publishedResponse.ok) {
+        return NextResponse.json({ error: `Unable to load ${sheet}` }, { status: publishedResponse.status });
+      }
+
+      data = rowsFromCsv(await publishedResponse.text());
+    }
 
     return NextResponse.json(data, {
       headers: {
-        'Cache-Control': 'no-store, max-age=0',
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
       },
     });
   } catch {
