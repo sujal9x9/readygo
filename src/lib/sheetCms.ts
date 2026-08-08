@@ -279,10 +279,14 @@ export function useCmsData(_fallbacks: {
     };
 
     update();
-    const interval = window.setInterval(update, 3000);
+    window.addEventListener('focus', update);
+    document.addEventListener('visibilitychange', update);
+    const interval = window.setInterval(update, 1000);
 
     return () => {
       active = false;
+      window.removeEventListener('focus', update);
+      document.removeEventListener('visibilitychange', update);
       window.clearInterval(interval);
     };
   }, []);
